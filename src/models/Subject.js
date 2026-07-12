@@ -7,6 +7,7 @@ const subjectSchema = new mongoose.Schema(
     code: { type: String, required: true, unique: true, uppercase: true, trim: true },
     description: { type: String, trim: true },
     maxScore: { type: Number, default: 100, min: 1 },
+    level: { type: String, enum: ['Primary', 'Secondary'], required: true, default: 'Primary' },
     // Categories this subject applies to (empty = all categories).
     categories: [{ type: String, enum: CATEGORIES }],
   },

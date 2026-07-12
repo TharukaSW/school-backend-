@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
-const { CATEGORIES, DAYS } = require('../config/constants');
+const { GRADES, DAYS } = require('../config/constants');
 
-// One lesson slot in a category's weekly timetable.
+// One lesson slot in a grade's weekly timetable.
 const timetableSchema = new mongoose.Schema(
   {
-    category: { type: String, enum: CATEGORIES, required: true },
+    grade: { type: Number, enum: GRADES, required: true },
     day: { type: String, enum: DAYS, required: true },
     startTime: { type: String, required: true }, // "09:00"
     endTime: { type: String, required: true }, // "09:45"
@@ -17,6 +17,6 @@ const timetableSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-timetableSchema.index({ category: 1, day: 1, startTime: 1 });
+timetableSchema.index({ grade: 1, day: 1, startTime: 1 });
 
 module.exports = mongoose.model('Timetable', timetableSchema);

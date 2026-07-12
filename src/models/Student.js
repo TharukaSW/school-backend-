@@ -26,6 +26,8 @@ const studentSchema = new mongoose.Schema(
     gender: { type: String, enum: ['Male', 'Female', 'Other'], default: 'Other' },
     // One of the school's three special-needs categories.
     category: { type: String, enum: CATEGORIES, required: [true, 'Category is required'] },
+    grade: { type: Number, min: 1, max: 11, required: [true, 'Grade is required'], default: 1 },
+    residence: { type: String, enum: ['Hostel', 'Home'], required: [true, 'Residence is required'], default: 'Home' },
     photoUrl: { type: String, trim: true },
     address: { type: String, trim: true },
     enrollmentDate: { type: Date, default: Date.now },
@@ -37,10 +39,6 @@ const studentSchema = new mongoose.Schema(
       phone: { type: String, trim: true },
       email: { type: String, trim: true, lowercase: true },
     },
-
-    // Homeroom / lead teacher.
-    teacher: { type: mongoose.Schema.Types.ObjectId, ref: 'Teacher', default: null },
-
     // Standing medical profile plus a log of dated records.
     medical: {
       bloodGroup: { type: String, trim: true },

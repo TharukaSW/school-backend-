@@ -9,7 +9,7 @@ const ctrl = crudFactory(Timetable, {
 });
 
 router.use(protect);
-router.get('/', ctrl.list); // supports ?category=Autism%20Spectrum
+router.get('/', ctrl.list); // supports ?grade=1
 router.get('/:id', ctrl.getOne);
 router.post('/', authorize('admin'), ctrl.create);
 router.put('/:id', authorize('admin'), ctrl.update);

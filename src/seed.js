@@ -46,12 +46,12 @@ async function run() {
   // --- Subjects ---
   console.log('Creating subjects...');
   const subjects = await Subject.create([
-    { name: 'Functional Literacy', code: 'LIT101', maxScore: 100, categories: CATEGORIES },
-    { name: 'Functional Numeracy', code: 'NUM101', maxScore: 100, categories: CATEGORIES },
-    { name: 'Communication Skills', code: 'COM101', maxScore: 50, categories: ['Autism Spectrum', 'Intellectual'] },
-    { name: 'Life Skills', code: 'LIFE101', maxScore: 100, categories: CATEGORIES },
-    { name: 'Sensory & Motor Skills', code: 'MOT101', maxScore: 50, categories: ['Physical/Sensory'] },
-    { name: 'Art & Music Therapy', code: 'ART101', maxScore: 50, categories: CATEGORIES },
+    { name: 'Functional Literacy', code: 'LIT101', maxScore: 100, level: 'Primary', categories: CATEGORIES },
+    { name: 'Functional Numeracy', code: 'NUM101', maxScore: 100, level: 'Primary', categories: CATEGORIES },
+    { name: 'Communication Skills', code: 'COM101', maxScore: 50, level: 'Primary', categories: ['Autism Spectrum', 'Intellectual'] },
+    { name: 'Life Skills', code: 'LIFE101', maxScore: 100, level: 'Primary', categories: CATEGORIES },
+    { name: 'Sensory & Motor Skills', code: 'MOT101', maxScore: 50, level: 'Primary', categories: ['Physical/Sensory'] },
+    { name: 'Art & Music Therapy', code: 'ART101', maxScore: 50, level: 'Primary', categories: CATEGORIES },
   ]);
 
   // --- Teachers (+ linked user accounts) ---
@@ -110,7 +110,6 @@ async function run() {
   const students = [];
   for (let i = 0; i < 12; i++) {
     const category = pick(CATEGORIES, i);
-    const homeroom = teachers.find((t) => t.specializations.includes(category)) || teachers[i % teachers.length];
     const student = await Student.create({
       admissionNumber: `ADM${(2024001 + i).toString()}`,
       firstName: pick(firstNames, i),
@@ -118,10 +117,11 @@ async function run() {
       dob: yearsAgo(7 + (i % 6)),
       gender: i % 2 === 0 ? 'Male' : 'Female',
       category,
+      grade: (i % 11) + 1,
+      residence: i % 3 === 0 ? 'Hostel' : 'Home',
       address: `${100 + i} Maple Street`,
       enrollmentDate: yearsAgo(1),
       status: 'Active',
-      teacher: homeroom._id,
       guardian: {
         name: `${pick(lastNames, i)} Family`,
         relation: 'Parent',
@@ -140,7 +140,7 @@ async function run() {
         notes: 'Follows an individualised education plan (IEP).',
         records: [
           { date: daysFromNow(-40), type: 'Checkup', title: 'Annual physical', description: 'No concerns.', recordedBy: 'Nurse Kelly' },
-          { date: daysFromNow(-10), type: 'Therapy', title: 'Occupational therapy session', description: 'Good progress on fine motor skills.', recordedBy: homeroom.firstName },
+          { date: daysFromNow(-10), type: 'Therapy', title: 'Occupational therapy session', description: 'Good progress on fine motor skills.', recordedBy: 'Nurse Kelly' },
         ],
       },
     });
@@ -165,7 +165,7 @@ async function run() {
     { title: 'Sensory Storytelling', description: 'Interactive session', date: daysFromNow(-3), location: 'Library', type: 'Academic', priority: 'Low', organizer: teachers[3]._id },
   ]);
 
-  // --- Timetable (per category) ---
+  // --- Timetable (per grade) ---
   console.log('Creating timetables...');
   const slots = [
     { start: '09:00', end: '09:45' },
@@ -176,22 +176,22 @@ async function run() {
     { start: '13:00', end: '13:45', activity: 'Life Skills / Sports' },
   ];
   const ttDocs = [];
-  CATEGORIES.forEach((category) => {
-    const catTeachers = teachers.filter((t) => t.specializations.includes(category));
+  const grades = Array.from({ length: 11 }, (_, i) => i + 1);
+  grades.forEach((grade) => {
     DAYS.forEach((day, di) => {
       slots.forEach((slot, si) => {
         const doc = {
-          category,
+          grade,
           day,
           startTime: slot.start,
           endTime: slot.end,
-          room: `Room ${String.fromCharCode(65 + (CATEGORIES.indexOf(category)))}${si + 1}`,
+          room: `Room G${grade}-${si + 1}`,
         };
         if (slot.activity) {
           doc.activity = slot.activity;
         } else {
           doc.subject = pick(subjects, di + si)._id;
-          doc.teacher = (catTeachers[si % Math.max(catTeachers.length, 1)] || teachers[si % teachers.length])._id;
+          doc.teacher = teachers[(grade + si) % teachers.length]._id;
         }
         ttDocs.push(doc);
       });
@@ -213,7 +213,7 @@ async function run() {
           student: student._id,
           subject: subject._id,
           term,
-          examType: 'Final',
+          level: 'Primary',
           score: Math.min(subject.maxScore, Math.round((base / 100) * subject.maxScore)),
           maxScore: subject.maxScore,
           date: daysFromNow(-30),

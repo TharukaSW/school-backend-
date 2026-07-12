@@ -5,10 +5,10 @@ const markSchema = new mongoose.Schema(
     student: { type: mongoose.Schema.Types.ObjectId, ref: 'Student', required: true },
     subject: { type: mongoose.Schema.Types.ObjectId, ref: 'Subject', required: true },
     term: { type: String, enum: ['Term 1', 'Term 2', 'Term 3'], required: true },
-    examType: {
+    level: {
       type: String,
-      enum: ['Quiz', 'Assignment', 'Mid-Term', 'Final', 'Practical'],
-      default: 'Final',
+      enum: ['Primary', 'Secondary'],
+      default: 'Primary',
     },
     score: { type: Number, required: true, min: 0 },
     maxScore: { type: Number, required: true, min: 1, default: 100 },
